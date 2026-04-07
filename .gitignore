@@ -1,0 +1,44 @@
+# User specifies
+.qwen/
+
+# Sensitive data
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# Dependencies
+node_modules/
+vendor/
+
+# Next.js (Frontend)
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/*.log
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+
+# Go (Backend)
+backend/main
+backend/*.exe
+backend/backend
+backend/*.log
+backend/logs/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+dist/
+build/

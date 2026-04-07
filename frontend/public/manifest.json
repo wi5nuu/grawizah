@@ -1,0 +1,57 @@
+{
+  "name": "Grawizah Intelligence Hub",
+  "short_name": "Grawizah",
+  "description": "The Next-Gen B2B Export-Import Intelligence & Marketplace Hub",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#6D28D9",
+  "orientation": "portrait-primary",
+  "categories": ["business", "productivity"],
+  "lang": "en",
+  "dir": "ltr",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/images/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Browse Products",
+      "short_name": "Products",
+      "description": "Explore global B2B product catalog",
+      "url": "/products",
+      "icons": [{ "src": "/images/android-chrome-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "AI Compliance Tools",
+      "short_name": "AI Tools",
+      "description": "HS Code, Sanction Screening & Document OCR",
+      "url": "/dashboard/ai-tools",
+      "icons": [{ "src": "/images/android-chrome-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Buyer Radar",
+      "short_name": "Intelligence",
+      "description": "Access premium buyer intelligence",
+      "url": "/dashboard/intelligence",
+      "icons": [{ "src": "/images/android-chrome-192x192.png", "sizes": "192x192" }]
+    }
+  ]
+}

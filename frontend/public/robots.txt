@@ -1,0 +1,25 @@
+# Grawizah Intelligence Hub - Robots.txt
+# https://grawizah.com
+
+User-agent: *
+Allow: /
+
+# Allow all crawlers access to public pages
+Allow: /products
+Allow: /categories
+Allow: /suppliers
+Allow: /about
+Allow: /blog
+
+# Block access to private areas
+Disallow: /dashboard
+Disallow: /dashboard/*
+Disallow: /login
+Disallow: /register
+Disallow: /api/
+
+# Crawl-delay for polite crawling
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://grawizah.com/sitemap.xml
