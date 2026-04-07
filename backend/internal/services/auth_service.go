@@ -279,7 +279,7 @@ func (s *AuthService) OAuthLogin(provider string, code string) (*models.LoginRes
 		oauthConfig = &oauth2.Config{
 			ClientID:     s.cfg.GoogleClientID,
 			ClientSecret: s.cfg.GoogleClientSecret,
-			RedirectURL:  fmt.Sprintf("%s/auth/callback?provider=google", s.cfg.FrontendURL),
+			RedirectURL:  fmt.Sprintf("%s/auth/callback", s.cfg.FrontendURL),
 			Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"},
 			Endpoint: oauth2.Endpoint{
 				AuthURL:  "https://accounts.google.com/o/oauth2/auth",
@@ -290,7 +290,7 @@ func (s *AuthService) OAuthLogin(provider string, code string) (*models.LoginRes
 		oauthConfig = &oauth2.Config{
 			ClientID:     s.cfg.FacebookClientID,
 			ClientSecret: s.cfg.FacebookClientSecret,
-			RedirectURL:  fmt.Sprintf("%s/auth/callback?provider=facebook", s.cfg.FrontendURL),
+			RedirectURL:  fmt.Sprintf("%s/auth/callback", s.cfg.FrontendURL),
 			Scopes:       []string{"email", "public_profile"},
 			Endpoint:     facebook.Endpoint,
 		}
@@ -298,7 +298,7 @@ func (s *AuthService) OAuthLogin(provider string, code string) (*models.LoginRes
 		oauthConfig = &oauth2.Config{
 			ClientID:     s.cfg.GitHubClientID,
 			ClientSecret: s.cfg.GitHubClientSecret,
-			RedirectURL:  fmt.Sprintf("%s/auth/callback?provider=github", s.cfg.FrontendURL),
+			RedirectURL:  fmt.Sprintf("%s/auth/callback", s.cfg.FrontendURL),
 			Scopes:       []string{"user:email"},
 			Endpoint:     github.Endpoint,
 		}

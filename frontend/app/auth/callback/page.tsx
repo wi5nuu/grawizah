@@ -13,7 +13,10 @@ export default function AuthCallbackPage() {
   useEffect(() => {
     const handleCallback = async () => {
       const code = searchParams.get('code');
-      const provider = searchParams.get('provider') || 'google';
+      
+      // Ambil provider dari localStorage (fallback ke google jika hilang)
+      const provider = localStorage.getItem('oauth_provider') || 'google';
+      localStorage.removeItem('oauth_provider'); // Bersihkan agar tidak nyangkut
 
       if (!code) {
         setError('No authorization code found');

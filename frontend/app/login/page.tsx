@@ -46,6 +46,9 @@ export default function LoginPage() {
     try {
       setLoading(true);
       setError('');
+      // Save provider to localStorage so we know which one to use in the callback
+      localStorage.setItem('oauth_provider', provider);
+      
       const response = await authAPI.getOAuthURL(provider);
       if (response.data.success && response.data.data.url) {
         window.location.href = response.data.data.url;
