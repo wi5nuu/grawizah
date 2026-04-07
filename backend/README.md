@@ -1,3 +1,12 @@
+---
+title: Grawizah Backend
+emoji: 🚀
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+pinned: false
+---
+
 # Grawizah Backend API
 
 The backend service for Grawizah - The Next-Gen B2B Export-Import Intelligence & Marketplace Hub.

@@ -31,8 +31,8 @@ const frequentlySearched = [
   { title: 'Mobile Phones', image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=300&h=300&fit=crop', href: '/products?search=mobile', id: 'e1000000-0000-0000-0000-000000000017' },
   { title: 'Luxury Watches', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&h=300&fit=crop', href: '/products?search=watch', id: 'e1000000-0000-0000-0000-000000000018' },
   { title: 'Premium Perfume', image: 'https://images.unsplash.com/photo-1594035910387-fea47794261f?w=300&h=300&fit=crop', href: '/products?search=perfume', id: 'e1000000-0000-0000-0000-000000000019' },
-  { title: 'Fresh Coconut', image: 'https://images.unsplash.com/photo-1621318029014-da9746e1075d?w=300&h=300&fit=crop', href: '/products?search=coconut', id: 'e1000000-0000-0000-0000-000000000020' },
-  { title: 'Crude Palm Oil', image: 'https://images.unsplash.com/photo-1543851501-79177a499f57?w=300&h=300&fit=crop', href: '/products?search=palm', id: 'e1000000-0000-0000-0000-000000000021' },
+  { title: 'Fresh Coconut', image: '/assets/products/coconut.png', href: '/products?search=coconut', id: 'e1000000-0000-0000-0000-000000000020' },
+  { title: 'Crude Palm Oil', image: '/assets/products/palm_oil.png', href: '/products?search=palm', id: 'e1000000-0000-0000-0000-000000000021' },
   { title: 'Smart LED TV', image: 'https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=300&h=300&fit=crop', href: '/products?search=tv', id: 'e1000000-0000-0000-0000-000000000022' },
   { title: 'Gaming Laptop', image: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=300&h=300&fit=crop', href: '/products?search=laptop', id: 'e1000000-0000-0000-0000-000000000023' },
   { title: 'Arabica Coffee', image: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=300&h=300&fit=crop', href: '/products?search=coffee', id: 'e1000000-0000-0000-0000-000000000024' },
@@ -70,7 +70,7 @@ const topDeals = [
   { name: 'Lab Equipment', image: 'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=300&h=300&fit=crop', price: 'Rp 5,632,185', moq: 'MOQ: 1' },
   { name: 'Car Coating', image: 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=300&h=300&fit=crop', price: 'Rp 15,597', moq: 'MOQ: 20' },
   { name: 'Portable Charger', image: 'https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?w=300&h=300&fit=crop', price: 'Rp 45,000', moq: 'MOQ: 50' },
-  { name: 'LED Strip Light', image: 'https://images.unsplash.com/photo-1565814636199-ae8133025a74?w=300&h=300&fit=crop', price: 'Rp 28,500', moq: 'MOQ: 30' },
+  { name: 'LED Strip Light', image: '/assets/products/led_strip.png', price: 'Rp 28,500', moq: 'MOQ: 30' },
 ];
 
 const topRankings = [
@@ -95,6 +95,14 @@ const samples = [
 ];
 
 const popularTags = ['Coffee Beans', 'Palm Oil', 'Rubber', 'Machinery', 'Electronics'];
+
+const heroImages = [
+  'https://images.unsplash.com/photo-1578575437130-527eed3abbec?w=1920&q=80',
+  'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=1920&q=80',
+  'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=1920&q=80',
+  'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=1920&q=80',
+  'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&q=80'
+];
 
 const protection = [
   { icon: FileText, title: 'Ordering', features: ['Secured Trading', 'Refunds'] },
@@ -193,6 +201,7 @@ export default function HomePage() {
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
+  const [currentHeroImage, setCurrentHeroImage] = useState(0);
 
   const [dFirstOrder, setDFirstOrder] = useState<any[]>(firstOrderProducts);
   const [dGuaranteed, setDGuaranteed] = useState<any[]>(guaranteedProducts);
@@ -317,17 +326,66 @@ export default function HomePage() {
     };
   }, []);
 
+  // Hero Image Slider
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentHeroImage((prev) => (prev + 1) % heroImages.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Automated Mobile Product Switching (Staggered)
+  useEffect(() => {
+    const sections = [
+      { id: 'savings-booster-scroll', interval: 3000 },
+      { id: 'guaranteed-scroll', interval: 4000 },
+      { id: 'customization-scroll', interval: 3500 }
+    ];
+    
+    const timers = sections.map(sec => {
+      const intervalId = setInterval(() => {
+        const container = document.getElementById(sec.id);
+        if (!container || window.innerWidth >= 1024) return;
+        
+        const cardWidth = 128 + 8; // w-32 (128px) + gap-2 (8px)
+        let nextScroll = container.scrollLeft + cardWidth;
+        
+        // If we are near the end, reset. We use a 10px buffer.
+        if (nextScroll >= container.scrollWidth - container.clientWidth - 10) {
+          nextScroll = 0;
+        }
+        
+        container.scrollTo({
+          left: nextScroll,
+          behavior: 'smooth'
+        });
+      }, sec.interval);
+      return intervalId;
+    });
+
+    return () => timers.forEach(clearInterval);
+  }, []);
+
   return (
     <div className="bg-neutral-50">
       {/* ========== HERO SECTION WITH BACKGROUND IMAGE ========== */}
       <section className="relative bg-neutral-900 overflow-hidden">
-        {/* Background Image with Overlay */}
+        {/* Animated Background Slider */}
         <div className="absolute inset-0">
-          <img
-            src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=1920&h=600&fit=crop"
-            alt="Business team collaborating"
-            className="w-full h-full object-cover"
-          />
+          {heroImages.map((src, i) => (
+            <div
+              key={src}
+              className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+                currentHeroImage === i ? 'opacity-100' : 'opacity-0'
+              }`}
+            >
+              <img
+                src={src}
+                alt={`Slide ${i}`}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          ))}
           <div className="absolute inset-0 bg-gradient-to-r from-neutral-900/90 via-neutral-900/70 to-neutral-900/50" />
         </div>
 
@@ -540,7 +598,7 @@ export default function HomePage() {
             </div>
 
             {/* Right: Products horizontal scroll */}
-            <div className="flex-1 overflow-x-auto scrollbar-hide">
+            <div id="savings-booster-scroll" className="flex-1 overflow-x-auto scrollbar-hide">
               <div className="flex gap-2">
                 {dFirstOrder.map((product, index) => (
                   <Link key={index} href={`/products/${product.id || "1"}`} className="flex-shrink-0 w-32 bg-white/80 backdrop-blur-sm rounded-lg border border-primary-200 overflow-hidden hover:shadow-md transition-all group">
@@ -616,12 +674,12 @@ export default function HomePage() {
                 </div>
                 <div className="grid grid-cols-4 gap-2 px-4 pb-4">
                   {dCustomization.map((product, index) => (
-                    <Link key={index} href={`/products/${product.id || "1"}`} className="bg-white rounded-lg overflow-hidden hover:shadow-md transition-all group relative">
-                      <div className="aspect-square bg-neutral-100 overflow-hidden">
+                    <Link key={index} href={`/products/${product.id || "1"}`} className="bg-white rounded-lg overflow-hidden hover:shadow-md transition-all group">
+                      <div className="aspect-square bg-neutral-100 overflow-hidden relative">
                         <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                      </div>
-                      <div className="absolute bottom-8 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent p-1">
-                        <p className="text-[9px] text-white text-center">{product.label}</p>
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-1.5">
+                          <p className="text-[9px] text-white text-center font-medium">{product.label}</p>
+                        </div>
                       </div>
                       <div className="p-2">
                         {role === "guest" ? (<Link href="/login" className="inline-flex mt-1 items-center gap-1.5 px-2 py-0.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-medium text-[10px] rounded transition-colors group-hover:bg-primary-50"><Lock className="w-2.5 h-2.5" /> Sign in</Link>) : (<p className="text-sm font-bold text-neutral-900">{product.price}</p>)}
@@ -637,7 +695,7 @@ export default function HomePage() {
             <div className="lg:hidden">
               <div className="flex gap-3">
                 {/* Left: Products horizontal scroll */}
-                <div className="flex-1 overflow-x-auto scrollbar-hide">
+                <div id="guaranteed-scroll" className="flex-1 overflow-x-auto scrollbar-hide">
                   <div className="flex gap-2">
                     {dGuaranteed.map((product, index) => (
                       <Link key={index} href={`/products/${product.id || "1"}`} className="flex-shrink-0 w-32 bg-white rounded-lg border border-neutral-200 overflow-hidden hover:shadow-md transition-all group">
@@ -690,15 +748,15 @@ export default function HomePage() {
                 </div>
 
                 {/* Right: Products horizontal scroll */}
-                <div className="flex-1 overflow-x-auto scrollbar-hide">
+                <div id="customization-scroll" className="flex-1 overflow-x-auto scrollbar-hide">
                   <div className="flex gap-2">
                     {dCustomization.map((product, index) => (
-                      <Link key={index} href={`/products/${product.id || "1"}`} className="flex-shrink-0 w-32 bg-white rounded-lg border border-neutral-200 overflow-hidden hover:shadow-md transition-all group relative">
-                        <div className="aspect-square bg-neutral-100 overflow-hidden">
+                      <Link key={index} href={`/products/${product.id || "1"}`} className="flex-shrink-0 w-32 bg-white rounded-lg border border-neutral-200 overflow-hidden hover:shadow-md transition-all group">
+                        <div className="aspect-square bg-neutral-100 overflow-hidden relative">
                           <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                        </div>
-                        <div className="absolute bottom-6 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent p-1">
-                          <p className="text-[9px] text-white text-center">{product.label}</p>
+                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-1.5">
+                            <p className="text-[9px] text-white text-center font-medium">{product.label}</p>
+                          </div>
                         </div>
                         <div className="p-2">
                           {role === "guest" ? (<Link href="/login" className="inline-flex mt-1 items-center gap-1.5 px-2 py-0.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-medium text-[10px] rounded transition-colors group-hover:bg-primary-50"><Lock className="w-2.5 h-2.5" /> Sign in</Link>) : (<p className="text-sm font-bold text-neutral-900">{product.price}</p>)}
@@ -979,13 +1037,13 @@ export default function HomePage() {
       </section>
 
       {/* ========== SMART BUSINESS SOLUTIONS (COMPETITION HIGHLIGHT) ========== */}
-      <section className="py-24 bg-white relative overflow-hidden border-t border-neutral-100">
+      <section className="py-12 md:py-24 bg-white relative overflow-hidden border-t border-neutral-100">
         <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-primary-100 rounded-full blur-3xl opacity-50"></div>
         <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-accent-100 rounded-full blur-3xl opacity-50"></div>
         
         <div className="max-w-[1440px] mx-auto px-4 relative z-10">
-          <div className="text-center max-w-3xl mx-auto mb-20">
-            <h2 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-5">
+          <div className="text-center max-w-3xl mx-auto mb-10 md:mb-20">
+            <h2 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-4">
               {t('hub_title')}
             </h2>
             <p className="text-neutral-600 text-sm md:text-lg leading-relaxed">
@@ -993,20 +1051,20 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="relative max-w-[1440px] mx-auto py-32 px-10 overflow-hidden lg:overflow-visible">
+          <div className="relative max-w-[1440px] mx-auto py-4 px-1 md:py-32 md:px-10 overflow-hidden lg:overflow-visible">
             {/* The Central Horizontal Root (Desktop) - Adjusted for Light Theme */}
             <div className="hidden lg:block absolute top-1/2 left-20 right-20 h-[3px] bg-gradient-to-r from-primary-200 via-accent-400 to-primary-200 -translate-y-1/2 rounded-full shadow-[0_0_10px_rgba(236,72,153,0.1)]"></div>
             
-            <div className="flex flex-col lg:flex-row items-center justify-around gap-12 lg:gap-0 relative z-10 w-full px-10">
+            <div className="flex flex-col lg:flex-row items-center justify-around gap-1 lg:gap-0 relative z-10 w-full px-0 md:px-10">
               
               {/* Feature 1 (Top) */}
               <div className="lg:w-1/4 flex flex-col items-center lg:-translate-y-36 group relative">
-                <div className="bg-white border border-neutral-200 rounded-3xl p-6 w-full max-w-[280px] hover:border-primary-500 transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.03)] group-hover:shadow-[0_20px_40px_rgba(99,102,241,0.12)] group-hover:-translate-y-3">
-                  <div className="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center mb-4 transition-colors group-hover:bg-primary-600">
-                    <FileText className="w-6 h-6 text-primary-600 group-hover:text-white" />
+                <div className="bg-white border border-neutral-200 rounded-2xl p-3 sm:p-6 w-full max-w-[280px] hover:border-primary-500 transition-all duration-300 shadow-[0_2px_15px_rgba(0,0,0,0.02)] group-hover:shadow-[0_20px_40px_rgba(99,102,241,0.12)] group-hover:-translate-y-3">
+                  <div className="w-8 h-8 md:w-12 md:h-12 bg-primary-50 rounded-lg flex items-center justify-center mb-2 transition-colors group-hover:bg-primary-600">
+                    <FileText className="w-4 h-4 md:w-6 md:h-6 text-primary-600 group-hover:text-white" />
                   </div>
-                  <h3 className="text-base font-bold mb-3 text-neutral-900">{t('hub_doc_title')}</h3>
-                  <p className="text-xs text-neutral-500 leading-relaxed font-medium">
+                  <h3 className="text-xs md:text-base font-bold mb-0.5 text-neutral-900 leading-tight">{t('hub_doc_title')}</h3>
+                  <p className="text-[10px] md:text-xs text-neutral-500 leading-relaxed font-medium">
                     {t('hub_doc_desc')}
                   </p>
                 </div>
@@ -1015,6 +1073,8 @@ export default function HomePage() {
                 <div className="hidden lg:flex absolute bottom-[-9.2rem] left-1/2 -translate-x-1/2 w-5 h-5 rounded-full bg-white border-2 border-primary-500 items-center justify-center z-20 shadow-sm">
                   <div className="w-1.5 h-1.5 bg-primary-500 rounded-full animate-pulse"></div>
                 </div>
+                {/* Mobile Connector (Down) */}
+                <div className="lg:hidden w-[1.5px] h-4 bg-gradient-to-b from-primary-200 to-transparent"></div>
               </div>
 
               {/* Feature 2 (Bottom) */}
@@ -1024,25 +1084,27 @@ export default function HomePage() {
                 <div className="hidden lg:flex absolute top-[-9.2rem] left-1/2 -translate-x-1/2 w-5 h-5 rounded-full bg-white border-2 border-accent-500 items-center justify-center z-20 shadow-sm">
                    <div className="w-1.5 h-1.5 bg-accent-500 rounded-full animate-pulse"></div>
                 </div>
-                <div className="bg-white border border-neutral-200 rounded-3xl p-6 w-full max-w-[280px] hover:border-accent-500 transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.03)] group-hover:shadow-[0_20px_40px_rgba(236,72,153,0.12)] group-hover:translate-y-3">
-                  <div className="w-12 h-12 bg-accent-50 rounded-xl flex items-center justify-center mb-4 transition-colors group-hover:bg-accent-600">
-                    <ZapIcon className="w-6 h-6 text-accent-600 group-hover:text-white" />
+                <div className="bg-white border border-neutral-200 rounded-2xl p-3 sm:p-6 w-full max-w-[280px] hover:border-accent-500 transition-all duration-300 shadow-[0_2px_15px_rgba(0,0,0,0.02)] group-hover:shadow-[0_20px_40px_rgba(236,72,153,0.12)] group-hover:translate-y-3">
+                  <div className="w-8 h-8 md:w-12 md:h-12 bg-accent-50 rounded-lg flex items-center justify-center mb-2 transition-colors group-hover:bg-accent-600">
+                    <ZapIcon className="w-4 h-4 md:w-6 md:h-6 text-accent-600 group-hover:text-white" />
                   </div>
-                  <h3 className="text-base font-bold mb-3 text-neutral-900">{t('hub_hs_title')}</h3>
-                  <p className="text-xs text-neutral-500 leading-relaxed font-medium">
+                  <h3 className="text-xs md:text-base font-bold mb-0.5 text-neutral-900 leading-tight">{t('hub_hs_title')}</h3>
+                  <p className="text-[10px] md:text-xs text-neutral-500 leading-relaxed font-medium">
                     {t('hub_hs_desc')}
                   </p>
                 </div>
+                {/* Mobile Connector (Down) */}
+                <div className="lg:hidden w-[1.5px] h-4 bg-gradient-to-b from-accent-200 to-transparent"></div>
               </div>
 
               {/* Feature 3 (Top) */}
               <div className="lg:w-1/4 flex flex-col items-center lg:-translate-y-36 group relative">
-                <div className="bg-white border border-neutral-200 rounded-3xl p-6 w-full max-w-[280px] hover:border-red-500 transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.03)] group-hover:shadow-[0_20px_40px_rgba(239,68,68,0.12)] group-hover:-translate-y-3">
-                  <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center mb-4 transition-colors group-hover:bg-red-600">
-                    <Shield className="w-6 h-6 text-red-600 group-hover:text-white" />
+                <div className="bg-white border border-neutral-200 rounded-2xl p-3 sm:p-6 w-full max-w-[280px] hover:border-red-500 transition-all duration-300 shadow-[0_2px_15px_rgba(0,0,0,0.02)] group-hover:shadow-[0_20px_40px_rgba(239,68,68,0.12)] group-hover:-translate-y-3">
+                  <div className="w-8 h-8 md:w-12 md:h-12 bg-red-50 rounded-lg flex items-center justify-center mb-2 transition-colors group-hover:bg-red-600">
+                    <Shield className="w-4 h-4 md:w-6 md:h-6 text-red-600 group-hover:text-white" />
                   </div>
-                  <h3 className="text-base font-bold mb-3 text-neutral-900">{t('hub_sanction_title')}</h3>
-                  <p className="text-xs text-neutral-500 leading-relaxed font-medium">
+                  <h3 className="text-xs md:text-base font-bold mb-0.5 text-neutral-900 leading-tight">{t('hub_sanction_title')}</h3>
+                  <p className="text-[10px] md:text-xs text-neutral-500 leading-relaxed font-medium">
                     {t('hub_sanction_desc')}
                   </p>
                 </div>
@@ -1051,6 +1113,8 @@ export default function HomePage() {
                 <div className="hidden lg:flex absolute bottom-[-9.2rem] left-1/2 -translate-x-1/2 w-5 h-5 rounded-full bg-white border-2 border-red-500 items-center justify-center z-20 shadow-sm">
                   <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></div>
                 </div>
+                {/* Mobile Connector (Down) */}
+                <div className="lg:hidden w-[1.5px] h-4 bg-gradient-to-b from-red-200 to-transparent"></div>
               </div>
 
               {/* Feature 4 (Bottom) */}
@@ -1060,12 +1124,12 @@ export default function HomePage() {
                 <div className="hidden lg:flex absolute top-[-9.2rem] left-1/2 -translate-x-1/2 w-5 h-5 rounded-full bg-white border-2 border-green-500 items-center justify-center z-20 shadow-sm">
                    <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
                 </div>
-                <div className="bg-white border border-neutral-200 rounded-3xl p-6 w-full max-w-[280px] hover:border-green-500 transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.03)] group-hover:shadow-[0_20px_40px_rgba(34,197,94,0.12)] group-hover:translate-y-3">
-                  <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center mb-4 transition-colors group-hover:bg-green-600">
-                    <BarChart3 className="w-6 h-6 text-green-600 group-hover:text-white" />
+                <div className="bg-white border border-neutral-200 rounded-2xl p-3 sm:p-6 w-full max-w-[280px] hover:border-green-500 transition-all duration-300 shadow-[0_2px_15px_rgba(0,0,0,0.02)] group-hover:shadow-[0_20px_40px_rgba(34,197,94,0.12)] group-hover:translate-y-3">
+                  <div className="w-8 h-8 md:w-12 md:h-12 bg-green-50 rounded-lg flex items-center justify-center mb-2 transition-colors group-hover:bg-green-600">
+                    <BarChart3 className="w-4 h-4 md:w-6 md:h-6 text-green-600 group-hover:text-white" />
                   </div>
-                  <h3 className="text-base font-bold mb-3 text-neutral-900">{t('hub_radar_title')}</h3>
-                  <p className="text-xs text-neutral-500 leading-relaxed font-medium">
+                  <h3 className="text-xs md:text-base font-bold mb-0.5 text-neutral-900 leading-tight">{t('hub_radar_title')}</h3>
+                  <p className="text-[10px] md:text-xs text-neutral-500 leading-relaxed font-medium">
                     {t('hub_radar_desc')}
                   </p>
                 </div>
@@ -1099,14 +1163,14 @@ export default function HomePage() {
         <div className="max-w-3xl mx-auto px-4 text-center">
           <h2 className="text-2xl sm:text-3xl font-bold mb-3">{t('hub_trial_title') || 'Ready to Trade Globally?'}</h2>
           <p className="text-neutral-400 mb-8 text-sm sm:text-base">{t('hub_trial_desc') || 'Join thousands of businesses using Grawizah for smarter global trade.'}</p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link href="/register">
-              <Button className="bg-primary-600 hover:bg-primary-700 text-white px-8 py-3 rounded-lg text-sm w-full sm:w-auto">
+          <div className="flex flex-row gap-2.5 justify-center mt-6">
+            <Link href="/register" className="flex-1 max-w-[160px]">
+              <Button className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2.5 rounded-lg text-xs w-full">
                 {t('nav_joinfree')}
               </Button>
             </Link>
-            <Link href="/products">
-              <Button className="border border-white/30 text-white hover:bg-white hover:text-neutral-900 px-8 py-3 rounded-lg text-sm bg-transparent w-full sm:w-auto">
+            <Link href="/products" className="flex-1 max-w-[160px]">
+              <Button className="border border-white/30 text-white hover:bg-white hover:text-neutral-900 px-4 py-2.5 rounded-lg text-xs bg-transparent w-full">
                 {t('nav_products')}
               </Button>
             </Link>
