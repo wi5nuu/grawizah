@@ -48,6 +48,9 @@ type Config struct {
 
 	// App URL
 	AppURL string
+
+	// Frontend URL for OAuth redirects
+	FrontendURL string
 }
 
 func LoadConfig() (*Config, error) {
@@ -88,6 +91,7 @@ func LoadConfig() (*Config, error) {
 		RateLimitDuration: rateLimitDuration,
 
 		AppURL: getEnv("APP_URL", "http://localhost:3000"),
+		FrontendURL: getEnv("FRONTEND_URL", "https://grawizah.vercel.app"),
 	}, nil
 }
 

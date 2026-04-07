@@ -69,7 +69,7 @@ func (s *AuthService) checkLoginLockout(email string) error {
 	).Scan(&lockedUntil)
 
 	if err == nil && lockedUntil != nil {
-		minutesLeft := int(lockedUntil.Sub(time.Now()).Minutes())
+		minutesLeft := int(time.Until(*lockedUntil).Minutes())
 		return fmt.Errorf("account locked for %d minutes due to multiple failed attempts", minutesLeft)
 	}
 
@@ -279,8 +279,8 @@ func (s *AuthService) OAuthLogin(provider string, code string) (*models.LoginRes
 		oauthConfig = &oauth2.Config{
 			ClientID:     s.cfg.GoogleClientID,
 			ClientSecret: s.cfg.GoogleClientSecret,
-			RedirectURL:  "http://localhost:8080/api/v1/auth/oauth/callback",
-			Scopes:       []string{"email", "profile"},
+			RedirectURL:  fmt.Sprintf("%s/auth/callback?provider=google", s.cfg.FrontendURL),
+			Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"},
 			Endpoint: oauth2.Endpoint{
 				AuthURL:  "https://accounts.google.com/o/oauth2/auth",
 				TokenURL: "https://oauth2.googleapis.com/token",
@@ -290,7 +290,7 @@ func (s *AuthService) OAuthLogin(provider string, code string) (*models.LoginRes
 		oauthConfig = &oauth2.Config{
 			ClientID:     s.cfg.FacebookClientID,
 			ClientSecret: s.cfg.FacebookClientSecret,
-			RedirectURL:  "http://localhost:8080/api/v1/auth/oauth/callback",
+			RedirectURL:  fmt.Sprintf("%s/auth/callback?provider=facebook", s.cfg.FrontendURL),
 			Scopes:       []string{"email", "public_profile"},
 			Endpoint:     facebook.Endpoint,
 		}
@@ -298,7 +298,7 @@ func (s *AuthService) OAuthLogin(provider string, code string) (*models.LoginRes
 		oauthConfig = &oauth2.Config{
 			ClientID:     s.cfg.GitHubClientID,
 			ClientSecret: s.cfg.GitHubClientSecret,
-			RedirectURL:  "http://localhost:8080/api/v1/auth/oauth/callback",
+			RedirectURL:  fmt.Sprintf("%s/auth/callback?provider=github", s.cfg.FrontendURL),
 			Scopes:       []string{"user:email"},
 			Endpoint:     github.Endpoint,
 		}

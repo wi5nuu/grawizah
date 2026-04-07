@@ -42,6 +42,10 @@ export const authAPI = {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
   },
+  getOAuthURL: (provider: string) =>
+    api.get(`/auth/oauth/url/${provider}`),
+  oauthLogin: (provider: string, code: string) =>
+    api.post('/auth/oauth/login', { provider, code }),
 };
 
 // Product endpoints
