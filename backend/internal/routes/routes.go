@@ -62,7 +62,13 @@ func SetupRouter(db *sql.DB, cfg *config.Config) http.Handler {
 	middleware.InitRateLimiter(cfg.RateLimitRequests, cfg.RateLimitDuration)
 	r.Use(middleware.RateLimitMiddleware())
 
-	// Health check endpoint
+	// Root / Health check endpoint
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{"status":"running","service":"grawizah-backend","message":"Welcome to Grawizah Intelligence Hub API"}`))
+	})
+
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
