@@ -203,6 +203,11 @@ export default function HomePage() {
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
   const [currentHeroImage, setCurrentHeroImage] = useState(0);
 
+  // States for mobile auto-switching cards
+  const [activeSavingsIdx, setActiveSavingsIdx] = useState(0);
+  const [activeGuaranteedIdx, setActiveGuaranteedIdx] = useState(0);
+  const [activeCustomizationIdx, setActiveCustomizationIdx] = useState(0);
+
   const [dFirstOrder, setDFirstOrder] = useState<any[]>(firstOrderProducts);
   const [dGuaranteed, setDGuaranteed] = useState<any[]>(guaranteedProducts);
   const [dCustomization, setDCustomization] = useState<any[]>(customizationProducts);
@@ -334,36 +339,25 @@ export default function HomePage() {
     return () => clearInterval(timer);
   }, []);
 
-  // Automated Mobile Product Switching (Staggered)
+  // Automated Mobile Product Switching (Single Swapping Cards)
   useEffect(() => {
-    const sections = [
-      { id: 'savings-booster-scroll', interval: 3000 },
-      { id: 'guaranteed-scroll', interval: 4000 },
-      { id: 'customization-scroll', interval: 3500 }
-    ];
+    if (window.innerWidth >= 1024) return;
     
-    const timers = sections.map(sec => {
-      const intervalId = setInterval(() => {
-        const container = document.getElementById(sec.id);
-        if (!container || window.innerWidth >= 1024) return;
-        
-        const cardWidth = 128 + 8; // w-32 (128px) + gap-2 (8px)
-        let nextScroll = container.scrollLeft + cardWidth;
-        
-        // If we are near the end, reset. We use a 10px buffer.
-        if (nextScroll >= container.scrollWidth - container.clientWidth - 10) {
-          nextScroll = 0;
-        }
-        
-        container.scrollTo({
-          left: nextScroll,
-          behavior: 'smooth'
-        });
-      }, sec.interval);
-      return intervalId;
-    });
+    const timer1 = setInterval(() => {
+      setActiveSavingsIdx(prev => prev + 1);
+    }, 3000);
+    const timer2 = setInterval(() => {
+      setActiveGuaranteedIdx(prev => prev + 1);
+    }, 4000);
+    const timer3 = setInterval(() => {
+      setActiveCustomizationIdx(prev => prev + 1);
+    }, 3500);
 
-    return () => timers.forEach(clearInterval);
+    return () => {
+      clearInterval(timer1);
+      clearInterval(timer2);
+      clearInterval(timer3);
+    };
   }, []);
 
   return (
@@ -583,36 +577,36 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Mobile: Banner left (scrollable), Products right (scrollable) */}
+          {/* Mobile: Banner left, Single Product Card right */}
           <div className="lg:hidden flex gap-3">
             {/* Left: Savings Booster Banner */}
-            <div className="flex-shrink-0 w-48 bg-gradient-to-br from-primary-50 to-primary-100 rounded-lg p-4 flex flex-col justify-center">
-              <div className="inline-block bg-primary-600 text-white text-[10px] font-medium px-2 py-0.5 rounded mb-2 w-fit">
+            <div className="flex-shrink-0 w-36 bg-gradient-to-br from-primary-50 to-primary-100 rounded-lg p-3 flex flex-col justify-center">
+              <div className="inline-block bg-primary-600 text-white text-[9px] font-medium px-1.5 py-0.5 rounded mb-1.5 w-fit">
                 Savings Booster
               </div>
-              <h3 className="text-base font-bold text-neutral-900 mb-0.5">First order,</h3>
-              <h3 className="text-base font-bold text-primary-600 mb-2">FREE shipping</h3>
-              <Link href="/first-order" className="inline-block bg-primary-600 hover:bg-primary-700 text-white px-3 py-1.5 rounded-full text-xs font-medium transition-colors w-fit">
+              <h3 className="text-sm font-bold text-neutral-900 mb-0.5">First order,</h3>
+              <h3 className="text-sm font-bold text-primary-600 mb-2">FREE shipping</h3>
+              <Link href="/first-order" className="inline-block bg-primary-600 hover:bg-primary-700 text-white px-2.5 py-1 rounded-full text-[10px] font-medium transition-colors w-fit">
                 Explore now
               </Link>
             </div>
 
-            {/* Right: Products horizontal scroll */}
-            <div id="savings-booster-scroll" className="flex-1 overflow-x-auto scrollbar-hide">
-              <div className="flex gap-2">
-                {dFirstOrder.map((product, index) => (
-                  <Link key={index} href={`/products/${product.id || "1"}`} className="flex-shrink-0 w-32 bg-white/80 backdrop-blur-sm rounded-lg border border-primary-200 overflow-hidden hover:shadow-md transition-all group">
-                    <div className="aspect-square bg-neutral-100 overflow-hidden">
-                      <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+            {/* Right: Single Auto-Swapping Product Card */}
+            <div className="flex-1 min-w-0">
+              {dFirstOrder.length > 0 && (
+                <Link href={`/products/${dFirstOrder[activeSavingsIdx % dFirstOrder.length].id || "1"}`} className="block w-full h-full bg-white/80 backdrop-blur-sm rounded-lg border border-primary-200 overflow-hidden shadow-sm transition-opacity duration-300">
+                  <div className="aspect-square bg-neutral-100 overflow-hidden relative">
+                    <img src={dFirstOrder[activeSavingsIdx % dFirstOrder.length].image} alt={dFirstOrder[activeSavingsIdx % dFirstOrder.length].name} className="w-full h-full object-cover" />
+                  </div>
+                  <div className="p-2 flex flex-col justify-between h-[calc(100%-100px)]">
+                    <p className="text-[10px] leading-tight text-neutral-700 line-clamp-2 mb-1">{dFirstOrder[activeSavingsIdx % dFirstOrder.length].name}</p>
+                    <div>
+                      {role === "guest" ? (<div className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 bg-neutral-100 text-neutral-600 font-medium text-[9px] rounded"><Lock className="w-2.5 h-2.5" /> Sign in</div>) : (<p className="text-xs font-bold text-primary-600 truncate">{dFirstOrder[activeSavingsIdx % dFirstOrder.length].price}</p>)}
+                      <p className="text-[9px] text-neutral-400 mt-0.5">{dFirstOrder[activeSavingsIdx % dFirstOrder.length].moq}</p>
                     </div>
-                    <div className="p-2">
-                      <p className="text-[10px] text-neutral-700 line-clamp-1 mb-1">{product.name}</p>
-                      {role === "guest" ? (<Link href="/login" className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-medium text-[10px] rounded transition-colors group-hover:bg-primary-50"><Lock className="w-2.5 h-2.5" /> Sign in</Link>) : (<p className="text-xs font-bold text-primary-600">{product.price}</p>)}
-                      <p className="text-[9px] text-neutral-400">{product.moq}</p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
+                  </div>
+                </Link>
+              )}
             </div>
           </div>
         </div>
@@ -691,80 +685,81 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Mobile: Grawizah Guaranteed - Products left (scroll), Banner right */}
+            {/* Mobile: Grawizah Guaranteed - Single Product Card left, Banner right */}
             <div className="lg:hidden">
               <div className="flex gap-3">
-                {/* Left: Products horizontal scroll */}
-                <div id="guaranteed-scroll" className="flex-1 overflow-x-auto scrollbar-hide">
-                  <div className="flex gap-2">
-                    {dGuaranteed.map((product, index) => (
-                      <Link key={index} href={`/products/${product.id || "1"}`} className="flex-shrink-0 w-32 bg-white rounded-lg border border-neutral-200 overflow-hidden hover:shadow-md transition-all group">
-                        <div className="aspect-square bg-neutral-100 overflow-hidden">
-                          <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                {/* Left: Single Auto-Swapping Product Card */}
+                <div className="flex-1 min-w-0">
+                  {dGuaranteed.length > 0 && (
+                    <Link href={`/products/${dGuaranteed[activeGuaranteedIdx % dGuaranteed.length].id || "1"}`} className="block w-full h-full bg-white rounded-lg border border-neutral-200 overflow-hidden shadow-sm transition-opacity duration-300">
+                      <div className="aspect-square bg-neutral-100 overflow-hidden relative">
+                        <img src={dGuaranteed[activeGuaranteedIdx % dGuaranteed.length].image} alt={dGuaranteed[activeGuaranteedIdx % dGuaranteed.length].name} className="w-full h-full object-cover" />
+                      </div>
+                      <div className="p-2 flex flex-col justify-between h-[calc(100%-100px)]">
+                        <p className="text-[10px] leading-tight text-neutral-700 line-clamp-2 mb-1">{dGuaranteed[activeGuaranteedIdx % dGuaranteed.length].name}</p>
+                        <div>
+                          {role === "guest" ? (<div className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 bg-neutral-100 text-neutral-600 font-medium text-[9px] rounded"><Lock className="w-2.5 h-2.5" /> Sign in</div>) : (<p className="text-xs font-bold text-neutral-900 truncate">{dGuaranteed[activeGuaranteedIdx % dGuaranteed.length].price}</p>)}
+                          <p className="text-[9px] text-primary-600 mt-0.5">{dGuaranteed[activeGuaranteedIdx % dGuaranteed.length].shipping}</p>
                         </div>
-                        <div className="p-2">
-                          {role === "guest" ? (<Link href="/login" className="inline-flex mt-1 items-center gap-1.5 px-2 py-0.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-medium text-[10px] rounded transition-colors group-hover:bg-primary-50"><Lock className="w-2.5 h-2.5" /> Sign in</Link>) : (<p className="text-sm font-bold text-neutral-900">{product.price}</p>)}
-                          <p className="text-[10px] text-primary-600">{product.shipping}</p>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
+                      </div>
+                    </Link>
+                  )}
                 </div>
 
                 {/* Right: Banner */}
-                <div className="flex-shrink-0 w-48 bg-gradient-to-br from-primary-700 to-primary-900 rounded-xl p-4 flex flex-col justify-center text-white">
-                  <h3 className="text-base font-bold mb-2">
+                <div className="flex-shrink-0 w-36 bg-gradient-to-br from-primary-700 to-primary-900 rounded-xl p-3 flex flex-col justify-center text-white">
+                  <h3 className="text-sm font-bold mb-1.5">
                     <span className="text-primary-300">Grawizah</span> Guaranteed
                   </h3>
-                  <div className="space-y-1 text-[10px] text-primary-200 mb-3">
-                    <p className="flex items-center gap-1"><Check className="w-3 h-3" /> Quick order</p>
-                    <p className="flex items-center gap-1"><Clock className="w-3 h-3" /> On-time delivery</p>
-                    <p className="flex items-center gap-1"><Shield className="w-3 h-3" /> Money-back</p>
+                  <div className="space-y-1 text-[9px] text-primary-200 mb-2.5">
+                    <p className="flex items-center gap-1"><Check className="w-2.5 h-2.5" /> Quick order</p>
+                    <p className="flex items-center gap-1"><Clock className="w-2.5 h-2.5" /> On-time delivery</p>
+                    <p className="flex items-center gap-1"><Shield className="w-2.5 h-2.5" /> Money-back</p>
                   </div>
-                  <Link href="/guaranteed" className="inline-block bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-full text-xs font-medium transition-colors w-fit">
+                  <Link href="/guaranteed" className="inline-block bg-white/20 hover:bg-white/30 text-white px-2.5 py-1 rounded-full text-[10px] font-medium transition-colors w-fit">
                     Explore now
                   </Link>
                 </div>
               </div>
             </div>
 
-            {/* Mobile: Fast Customization - Banner left, Products right (scroll) */}
+            {/* Mobile: Fast Customization - Banner left, Single Product Card right */}
             <div className="lg:hidden">
               <div className="flex gap-3">
                 {/* Left: Banner */}
-                <div className="flex-shrink-0 w-48 bg-gradient-to-br from-accent-700 to-accent-900 rounded-xl p-4 flex flex-col justify-center text-white">
-                  <h3 className="text-base font-bold mb-2 flex items-center gap-1">
-                    
+                <div className="flex-shrink-0 w-36 bg-gradient-to-br from-accent-700 to-accent-900 rounded-xl p-3 flex flex-col justify-center text-white">
+                  <h3 className="text-sm font-bold mb-1.5 flex items-center gap-1">
                     Fast customization
                   </h3>
-                  <div className="space-y-1 text-[10px] text-accent-200 mb-3">
-                    <p className="flex items-center gap-1"><Tag className="w-3 h-3" /> Low MOQ</p>
-                    <p className="flex items-center gap-1"><Clock className="w-3 h-3" /> 14-day dispatch</p>
-                    <p className="flex items-center gap-1"><Check className="w-3 h-3" /> True to design</p>
+                  <div className="space-y-1 text-[9px] text-accent-200 mb-2.5">
+                    <p className="flex items-center gap-1"><Tag className="w-2.5 h-2.5" /> Low MOQ</p>
+                    <p className="flex items-center gap-1"><Clock className="w-2.5 h-2.5" /> 14-day dispatch</p>
+                    <p className="flex items-center gap-1"><Check className="w-2.5 h-2.5" /> True to design</p>
                   </div>
-                  <Link href="/customization" className="inline-block bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-full text-xs font-medium transition-colors w-fit">
+                  <Link href="/customization" className="inline-block bg-white/20 hover:bg-white/30 text-white px-2.5 py-1 rounded-full text-[10px] font-medium transition-colors w-fit">
                     Explore now
                   </Link>
                 </div>
 
-                {/* Right: Products horizontal scroll */}
-                <div id="customization-scroll" className="flex-1 overflow-x-auto scrollbar-hide">
-                  <div className="flex gap-2">
-                    {dCustomization.map((product, index) => (
-                      <Link key={index} href={`/products/${product.id || "1"}`} className="flex-shrink-0 w-32 bg-white rounded-lg border border-neutral-200 overflow-hidden hover:shadow-md transition-all group">
-                        <div className="aspect-square bg-neutral-100 overflow-hidden relative">
-                          <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-1.5">
-                            <p className="text-[9px] text-white text-center font-medium">{product.label}</p>
-                          </div>
+                {/* Right: Single Auto-Swapping Product Card */}
+                <div className="flex-1 min-w-0">
+                  {dCustomization.length > 0 && (
+                    <Link href={`/products/${dCustomization[activeCustomizationIdx % dCustomization.length].id || "1"}`} className="block w-full h-full bg-white rounded-lg border border-neutral-200 overflow-hidden shadow-sm transition-opacity duration-300">
+                      <div className="aspect-square bg-neutral-100 overflow-hidden relative">
+                        <img src={dCustomization[activeCustomizationIdx % dCustomization.length].image} alt={dCustomization[activeCustomizationIdx % dCustomization.length].name} className="w-full h-full object-cover" />
+                        <div className="absolute bottom-1 left-1 right-1 bg-gradient-to-t from-black/80 to-transparent p-1 rounded">
+                          <p className="text-[8px] leading-tight text-white text-center font-medium line-clamp-2">{dCustomization[activeCustomizationIdx % dCustomization.length].label}</p>
                         </div>
-                        <div className="p-2">
-                          {role === "guest" ? (<Link href="/login" className="inline-flex mt-1 items-center gap-1.5 px-2 py-0.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-medium text-[10px] rounded transition-colors group-hover:bg-primary-50"><Lock className="w-2.5 h-2.5" /> Sign in</Link>) : (<p className="text-sm font-bold text-neutral-900">{product.price}</p>)}
-                          <p className="text-[10px] text-neutral-400">{product.moq}</p>
+                      </div>
+                      <div className="p-2 flex flex-col justify-between h-[calc(100%-100px)]">
+                         <p className="text-[10px] leading-tight text-neutral-700 line-clamp-2 mb-1">{dCustomization[activeCustomizationIdx % dCustomization.length].name}</p>
+                        <div>
+                          {role === "guest" ? (<div className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 bg-neutral-100 text-neutral-600 font-medium text-[9px] rounded"><Lock className="w-2.5 h-2.5" /> Sign in</div>) : (<p className="text-xs font-bold text-neutral-900 truncate">{dCustomization[activeCustomizationIdx % dCustomization.length].price}</p>)}
+                          <p className="text-[9px] text-neutral-400 mt-0.5">{dCustomization[activeCustomizationIdx % dCustomization.length].moq}</p>
                         </div>
-                      </Link>
-                    ))}
-                  </div>
+                      </div>
+                    </Link>
+                  )}
                 </div>
               </div>
             </div>
