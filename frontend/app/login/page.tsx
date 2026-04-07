@@ -43,6 +43,7 @@ export default function LoginPage() {
   };
 
   const handleSocialLogin = async (provider: string) => {
+    console.log(`Starting social login for: ${provider}`);
     try {
       setLoading(true);
       setError('');
@@ -50,12 +51,17 @@ export default function LoginPage() {
       localStorage.setItem('oauth_provider', provider);
       
       const response = await authAPI.getOAuthURL(provider);
+      console.log('OAuth URL response:', response.data);
+      
       if (response.data.success && response.data.data.url) {
         window.location.href = response.data.data.url;
+      } else {
+        throw new Error('No URL returned from server');
       }
     } catch (err: any) {
       console.error('Social login error:', err);
-      setError('Failed to initiate login. Please try again.');
+      const msg = err.response?.data?.error || err.message || 'Failed to initiate login.';
+      setError(`${msg} Please check if backend is running.`);
     } finally {
       setLoading(false);
     }
@@ -156,6 +162,7 @@ export default function LoginPage() {
               onClick={() => handleSocialLogin('google')}
               disabled={loading}
               className="flex items-center justify-center p-3 border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors disabled:opacity-50"
+              title="Sign in with Google"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -168,6 +175,7 @@ export default function LoginPage() {
               onClick={() => handleSocialLogin('facebook')}
               disabled={loading}
               className="flex items-center justify-center p-3 border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors disabled:opacity-50"
+              title="Sign in with Facebook"
             >
               <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
@@ -177,9 +185,10 @@ export default function LoginPage() {
               onClick={() => handleSocialLogin('github')}
               disabled={loading}
               className="flex items-center justify-center p-3 border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors disabled:opacity-50"
+              title="Sign in with GitHub"
             >
               <svg className="w-5 h-5 text-neutral-800" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 18c-4.418 0-8-3.582-8-8s3.582-8 8-8 8 3.582 8 8-3.582 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.11.825-.26.825-.58 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
               </svg>
             </button>
           </div>
