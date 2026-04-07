@@ -1,3 +1,14 @@
+---
+title: Grawizah
+emoji: 🚀
+colorFrom: purple
+colorTo: blue
+sdk: docker
+app_port: 8080
+app_file: backend/Dockerfile
+pinned: false
+---
+
 # Grawizah - The Next-Gen B2B Export-Import Intelligence & Marketplace Hub
 
 ## 🌍 Project Overview
