@@ -17,17 +17,14 @@ RUN go mod download
 COPY . .
 
 # Build the application
+# CGO_ENABLED=0 wajib untuk binary statis di Alpine
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main ./cmd/main.go
 
 # Stage 2: Run
 FROM alpine:latest
 
-# Install ca-certificates for HTTPS
-RUN apk --no-cache add ca-certificates
-
-# Create non-root user
-RUN addgroup -g 1001 appuser && \
-    adduser -D -u 1001 -G appuser appuser
+# Install base necessities
+RUN apk --no-cache add ca-certificates tzdata
 
 # Set working directory
 WORKDIR /app
@@ -35,21 +32,22 @@ WORKDIR /app
 # Copy binary from builder
 COPY --from=builder /app/main .
 
-# Copy env example
-COPY --from=builder /app/.env.example .env.example
+# Pastikan binary memiliki izin eksekusi
+RUN chmod +x /app/main
 
-# Change ownership to non-root user
-RUN chown -R appuser:appuser /app
+# Salin file environment jika ada (Opsional untuk HF karena pakai Secrets)
+# COPY --from=builder /app/.env.example .env.example
 
-# Switch to non-root user
-USER appuser
+# SEMENTARA: Jalankan sebagai root (default) untuk memastikan tidak ada 
+# hambatan pada sandboxing port 7860 di Hugging Face CPU Basic.
+# USER 1001 
 
-# Set default port for Hugging Face
+# Pastikan variabel lingkungan PORT tetap ada
 ENV PORT=7860
 
-# Expose port
+# Expose port (Informasional untuk Docker)
 EXPOSE 7860
 
-# Run the application
-# Using absolute path and no internal health check for maximum stability
-CMD ["/app/main"]
+# ENTRYPOINT adalah cara paling pasti menjalankan process utama (PID 1)
+# Ini menjamin binary Go mengontrol kontainer sepenuhnya.
+ENTRYPOINT ["/app/main"]
