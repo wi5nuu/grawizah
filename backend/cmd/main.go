@@ -34,9 +34,14 @@ func main() {
 	}
 	defer database.CloseDatabase(db)
 
-	// Run database migrations
-	if err := database.RunMigrations(db); err != nil {
-		log.Fatalf("CRITICAL: Failed to run migrations: %v", err)
+	// Run database migrations (can be skipped if already done)
+	if os.Getenv("SKIP_MIGRATIONS") == "true" {
+		log.Println("⏭️  Skipping migrations (SKIP_MIGRATIONS=true)")
+	} else {
+		log.Println("🔄 Running database migrations...")
+		if err := database.RunMigrations(db); err != nil {
+			log.Fatalf("CRITICAL: Failed to run migrations: %v", err)
+		}
 	}
 
 	// Initialize router
