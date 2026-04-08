@@ -167,7 +167,7 @@ export default function RootLayout({
         <meta httpEquiv="X-XSS-Protection" content="1; mode=block" />
         <meta
           httpEquiv="Content-Security-Policy"
-          content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; connect-src 'self' http://localhost:8081 https://api.groq.com https://*.supabase.co https://www.google-analytics.com https://www.googletagmanager.com; frame-ancestors 'none';"
+          content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; connect-src 'self' http://localhost:8080 http://localhost:8081 https://wisnu-ashar-grawizah.hf.space https://*.hf.space https://api.groq.com https://*.supabase.co https://www.google-analytics.com https://www.googletagmanager.com; frame-ancestors 'none';"
         />
         <meta name="referrer" content="strict-origin-when-cross-origin" />
       </head>
