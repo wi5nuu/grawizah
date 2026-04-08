@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"grawizah.com/backend/internal/config"
 	"grawizah.com/backend/internal/database"
@@ -12,12 +13,12 @@ import (
 )
 
 func main() {
-	// Standard logging setup
+	// Standard logging setup to see everything in Hugging Face logs
 	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 
 	// Load .env file
 	if err := godotenv.Load(); err != nil {
-		log.Println("⚠️  .env file not found, using system environment variables")
+		log.Println("ℹ️  .env file not found, using system environment variables")
 	}
 
 	// Load configuration
@@ -41,18 +42,20 @@ func main() {
 	// Initialize router
 	router := routes.SetupRouter(db, cfg)
 
-	// Explicitly bind to 0.0.0.0 and block on ListenAndServe
-	// No goroutines, no complex signal handling for maximum Hugging Face compatibility
-	port := cfg.Port
+	// --- LOGIKA PORT FINAL UNTUK HUGGING FACE ---
+	// Kami mengambil PORT langsung dari OS untuk menghindari kesalahan fallback di package config
+	port := os.Getenv("PORT")
 	if port == "" {
-		port = "7860"
+		port = "7860" // Port default wajib untuk Spaces
+		log.Println("⚠️  HUGGING FACE PORT ENV NOT DETECTED! FORCING FALLBACK TO 7860")
 	}
 	
 	addr := "0.0.0.0:" + port
-	log.Printf("🚀 GRAWIZAH BACKEND STARTING ON %s", addr)
+	log.Printf("🚀 SERVER STATUS: BINDING TO %s", addr)
+	log.Printf("📡 PUBLIC ACCESS SHOULD BE AVAILABLE AT THE SPACES URL")
 	
-	// This call is BLOCKING, which ensures the container stays alive as long as the server is running
+	// Blocking call - kontainer akan tetap hidup selama server ini berjalan
 	if err := http.ListenAndServe(addr, router); err != nil {
-		log.Fatalf("CRITICAL: Server failed: %v", err)
+		log.Fatalf("CRITICAL ERROR: Failed to start server on %s: %v", addr, err)
 	}
 }
