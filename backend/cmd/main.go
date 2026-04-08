@@ -1,13 +1,8 @@
 package main
 
 import (
-	"context"
 	"log"
 	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
 
 	"grawizah.com/backend/internal/config"
 	"grawizah.com/backend/internal/database"
@@ -17,6 +12,9 @@ import (
 )
 
 func main() {
+	// Standard logging setup
+	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
+
 	// Load .env file
 	if err := godotenv.Load(); err != nil {
 		log.Println("⚠️  .env file not found, using system environment variables")
@@ -25,52 +23,36 @@ func main() {
 	// Load configuration
 	cfg, err := config.LoadConfig()
 	if err != nil {
-		log.Fatalf("Failed to load configuration: %v", err)
+		log.Fatalf("CRITICAL: Failed to load configuration: %v", err)
 	}
 
 	// Initialize database
 	db, err := database.NewDatabase(cfg)
 	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
+		log.Fatalf("CRITICAL: Failed to connect to database: %v", err)
 	}
 	defer database.CloseDatabase(db)
 
 	// Run database migrations
 	if err := database.RunMigrations(db); err != nil {
-		log.Fatalf("Failed to run migrations: %v", err)
+		log.Fatalf("CRITICAL: Failed to run migrations: %v", err)
 	}
 
 	// Initialize router
 	router := routes.SetupRouter(db, cfg)
 
-	// Create HTTP server
-	srv := &http.Server{
-		Addr:         "0.0.0.0:" + cfg.Port,
-		Handler:      router,
-		ReadTimeout:  15 * time.Second,
-		WriteTimeout: 15 * time.Second,
-		IdleTimeout:  60 * time.Second,
+	// Explicitly bind to 0.0.0.0 and block on ListenAndServe
+	// No goroutines, no complex signal handling for maximum Hugging Face compatibility
+	port := cfg.Port
+	if port == "" {
+		port = "7860"
 	}
-
-	// Start server in a goroutine
-	go func() {
-		log.Printf("🚀 Grawizah Backend starting on port %s", cfg.Port)
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("Server failed to start: %v", err)
-		}
-	}()
-
-	// Wait for interrupt signal to gracefully shutdown the server
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
-	log.Println("\n📡 Shutting down server...")
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	if err := srv.Shutdown(ctx); err != nil {
-		log.Fatalf("Server forced to shutdown: %v", err)
+	
+	addr := "0.0.0.0:" + port
+	log.Printf("🚀 GRAWIZAH BACKEND STARTING ON %s", addr)
+	
+	// This call is BLOCKING, which ensures the container stays alive as long as the server is running
+	if err := http.ListenAndServe(addr, router); err != nil {
+		log.Fatalf("CRITICAL: Server failed: %v", err)
 	}
-
-	log.Println("✅ Server exited properly")
 }

@@ -12,6 +12,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
+
+	"log"
 )
 
 func SetupRouter(db *sql.DB, cfg *config.Config) http.Handler {
@@ -56,7 +58,10 @@ func SetupRouter(db *sql.DB, cfg *config.Config) http.Handler {
 		MaxAge:           300,
 	}))
 	r.Use(middleware.LoggingMiddleware())
-	r.Use(middleware.SecurityMiddleware())
+	r.Use(middleware.LoggingMiddleware())
+	// Temporarily disabling restrictive security headers (like X-Frame-Options: DENY) 
+	// to ensure Hugging Face health checks and previews pass during initial setup.
+	// r.Use(middleware.SecurityMiddleware())
 
 	// Initialize rate limiter
 	middleware.InitRateLimiter(cfg.RateLimitRequests, cfg.RateLimitDuration)
@@ -64,12 +69,14 @@ func SetupRouter(db *sql.DB, cfg *config.Config) http.Handler {
 
 	// Root / Health check endpoint
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("PROBE: [GET] / from %s", r.RemoteAddr)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(`{"status":"running","service":"grawizah-backend","message":"Welcome to Grawizah Intelligence Hub API"}`))
 	})
 
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("PROBE: [GET] /health from %s", r.RemoteAddr)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(`{"status":"ok","service":"grawizah-backend"}`))
