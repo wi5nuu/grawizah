@@ -58,7 +58,6 @@ func SetupRouter(db *sql.DB, cfg *config.Config) http.Handler {
 		MaxAge:           300,
 	}))
 	r.Use(middleware.LoggingMiddleware())
-	r.Use(middleware.LoggingMiddleware())
 	// Temporarily disabling restrictive security headers (like X-Frame-Options: DENY) 
 	// to ensure Hugging Face health checks and previews pass during initial setup.
 	// r.Use(middleware.SecurityMiddleware())
@@ -80,6 +79,27 @@ func SetupRouter(db *sql.DB, cfg *config.Config) http.Handler {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(`{"status":"ok","service":"grawizah-backend"}`))
+	})
+
+	r.Get("/health/deep", func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("PROBE: [GET] /health/deep from %s", r.RemoteAddr)
+		
+		// Test DB connection
+		err := db.Ping()
+		dbStatus := "connected"
+		if err != nil {
+			dbStatus = "disconnected"
+			log.Printf("❌ DEEP HEALTH CHECK FAILED: %v", err)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		if err != nil {
+			w.WriteHeader(http.StatusServiceUnavailable)
+		} else {
+			w.WriteHeader(http.StatusOK)
+		}
+		
+		w.Write([]byte(`{"status":"` + dbStatus + `","service":"grawizah-backend","database":"` + dbStatus + `"}`))
 	})
 
 	// API v1 routes
