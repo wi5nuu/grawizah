@@ -1,7 +1,6 @@
 package database
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
 	"log"
@@ -34,12 +33,9 @@ func NewDatabase(cfg *config.Config) (*sql.DB, error) {
 	db.SetMaxIdleConns(25)
 	db.SetConnMaxLifetime(5 * time.Minute)
 
-	// Test the connection with a timeout
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	if err := db.PingContext(ctx); err != nil {
-		return nil, fmt.Errorf("failed to ping database (timeout): %w", err)
+	// Test the connection
+	if err := db.Ping(); err != nil {
+		return nil, fmt.Errorf("failed to ping database: %w", err)
 	}
 
 	log.Println("✅ Successfully connected to PostgreSQL database")

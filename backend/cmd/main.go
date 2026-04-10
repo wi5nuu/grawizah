@@ -28,12 +28,10 @@ func main() {
 	}
 
 	// Initialize database
-	log.Println("🔌 Connecting to PostgreSQL database...")
 	db, err := database.NewDatabase(cfg)
 	if err != nil {
 		log.Fatalf("CRITICAL: Failed to connect to database: %v", err)
 	}
-	log.Println("✅ Database connection established")
 	defer database.CloseDatabase(db)
 
 	// Run database migrations (can be skipped if already done)
@@ -47,9 +45,7 @@ func main() {
 	}
 
 	// Initialize router
-	log.Println("📝 Setting up API routes and middleware...")
 	router := routes.SetupRouter(db, cfg)
-	log.Println("✅ Router initialized successfully")
 
 	// --- LOGIKA PORT FINAL UNTUK HUGGING FACE ---
 	// Kami mengambil PORT langsung dari OS untuk menghindari kesalahan fallback di package config
